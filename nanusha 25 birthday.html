@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Musu 🌸</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'Arial Rounded MT Bold', sans-serif; transition: background 2s ease; background: #0a0a23; }
+
+        /* Start Button Screen */
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, #1a1a2e, #000); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        #play-button { padding: 20px 50px; font-size: 26px; background: #ff4d6d; color: white; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 0 30px #ff4d6d; font-weight: bold; }
+
+        /* Big Falling Hearts & Sparkles */
+        .falling { position: absolute; top: -100px; animation: fall linear infinite; pointer-events: none; z-index: 1; }
+        @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+        /* Game Target Hearts */
+        .heart-btn { position: absolute; font-size: 70px; cursor: pointer; z-index: 10; filter: drop-shadow(0 0 15px #fff); animation: pulse 1.5s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
+
+        /* Bold Instruction Box */
+        #ui-box { position: fixed; bottom: 30px; right: 30px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(15px); border: 3px solid white; padding: 20px 35px; border-radius: 30px; color: white; text-align: center; z-index: 100; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        #ui-box b { font-size: 26px; display: block; font-weight: 900; text-shadow: 2px 2px 5px #000; letter-spacing: 1px; }
+
+        /* Wish Screen */
+        #wish-screen { display: none; height: 100vh; width: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .moon-icon { font-size: 110px; animation: moonGlow 3s infinite alternate; margin-bottom: 30px; }
+        @keyframes moonGlow { from { filter: drop-shadow(0 0 20px #fff); } to { filter: drop-shadow(0 0 70px #fff4bd); transform: scale(1.05); } }
+
+        /* Two-Line Text Layout */
+        #text-box { width: 95%; display: flex; flex-direction: column; align-items: center; gap: 25px; }
+        .wish-line { display: flex; flex-wrap: wrap; justify-content: center; line-height: 1.5; }
+        .word { display: inline-block; font-size: 36px; font-weight: 900; opacity: 0; animation: popUp 0.6s forwards; margin: 0 12px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        @keyframes popUp { 0% { opacity: 0; transform: scale(0.3); } 100% { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div id="start-screen">
+        <h1 style="font-size: 40px; margin-bottom: 20px;">Hey Musu! 🌸</h1>
+        <button id="play-button" onclick="startGame()">Open My Gift 🎁</button>
+    </div>
+
+    <audio id="birthday-music" loop preload="auto">
+        <source src="https://actions.google.com/開關/funny_instrumental.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="game-layer" style="display:none;">
+        <div id="ui-box">
+            <b>Musu 10 ota heart collect garaw ❤️</b>
+            <span id="score-text" style="font-size: 40px; font-weight: 900;">0</span> / 10
+        </div>
+    </div>
+
+    <div id="wish-screen">
+        <div class="moon-icon">🌕</div>
+        <div id="text-box">
+            <div id="line-1" class="wish-line"></div>
+            <div id="line-2" class="wish-line"></div>
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        const themes = [
+            'linear-gradient(45deg, #ff9a9e, #fecfef)', 'linear-gradient(45deg, #a1c4fd, #c2e9fb)',
+            'linear-gradient(45deg, #84fab0, #8fd3f4)', 'linear-gradient(45deg, #fccb90, #d57eeb)',
+            'linear-gradient(45deg, #e0c3fc, #8ec5fc)', 'linear-gradient(45deg, #f093fb, #f5576c)',
+            'linear-gradient(45deg, #4facfe, #00f2fe)', 'linear-gradient(45deg, #fa709a, #fee140)',
+            'linear-gradient(45deg, #667eea, #764ba2)', 'radial-gradient(circle, #2c3e50, #000)'
+        ];
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-layer').style.display = 'block';
+            const audio = document.getElementById('birthday-music');
+            audio.play().catch(e => console.log("Audio play failed, clicking again might help."));
+            spawnHeart();
+            setInterval(createFallingItems, 250);
+        }
+
+        function createFallingItems() {
+            const items = ["❤️", "💖", "✨", "🌸", "🍬", "🍭", "⭐"];
+            const d = document.createElement('div');
+            d.className = 'falling';
+            const isBigHeart = Math.random() > 0.7; // 30% chance for extra big heart
+            d.innerText = items[Math.floor(Math.random() * items.length)];
+            d.style.fontSize = isBigHeart ? '60px' : '25px';
+            d.style.left = Math.random() * 100 + 'vw';
+            d.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 5000);
+        }
+
+        function spawnHeart() {
+            if (score >= 10) return;
+            const h = document.createElement('div');
+            h.className = 'heart-btn';
+            h.innerText = '❤️';
+            h.style.left = Math.random() * 80 + 10 + 'vw';
+            h.style.top = Math.random() * 70 + 10 + 'vh';
+            
+            h.onclick = () => {
+                score++;
+                document.getElementById('score-text').innerText = score;
+                document.body.style.background = themes[score - 1];
+                h.style.transform = "scale(0)";
+                setTimeout(() => h.remove(), 200);
+                if (score < 10) spawnHeart();
+                else showFinalWish();
+            };
+            document.getElementById('game-layer').appendChild(h);
+        }
+
+        function showFinalWish() {
+            document.getElementById('game-layer').style.display = 'none';
+            document.getElementById('wish-screen').style.display = 'flex';
+            confetti({ particleCount: 300, spread: 100, origin: { y: 0.6 } });
+
+            const line1 = ["Happy", "Birthday,", "Musu!", "🎂", "🎉"];
+            const line2 = ["May", "your", "life", "glow", "like", "the", "full", "moon", "🌕✨", "full", "of", "love,", "peace,", "and", "happiness", "💖🌸"];
+            
+            const colors = ["#FF1493", "#00E5FF", "#FFD700", "#FF4500", "#ADFF2F", "#EE82EE", "#00FA9A"];
+            let delayCount = 0;
+
+            const printLine = (words, containerId) => {
+                const target = document.getElementById(containerId);
+                words.forEach(word => {
+                    const span = document.createElement('span');
+                    span.innerText = word;
+                    span.className = 'word';
+                    span.style.color = colors[Math.floor(Math.random() * colors.length)];
+                    span.style.animationDelay = (delayCount * 0.25) + "s";
+                    target.appendChild(span);
+                    delayCount++;
+                });
+            };
+
+            printLine(line1, "line-1");
+            printLine(line2, "line-2");
+
+            let bIdx = 0;
+            setInterval(() => {
+                document.body.style.background = themes[bIdx % themes.length];
+                bIdx++;
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
